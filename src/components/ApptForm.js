@@ -16,16 +16,17 @@ class ApptForm extends Component {
             date: this.props.inputValues.bookingDetails !== undefined ? moment(new Date(this.props.inputValues.bookingDetails.vac_date)).valueOf() : new Date(),
             data: this.props.inputValues,
             errorMessage: "",
-            successMessage:"",
-            isDisabled:false,
+            successMessage:""
         };
         this.handleDateChange = this.handleDateChange.bind(this);
         this.createUser = this.createUser.bind(this);
         this.updateUser = this.updateUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
+        this.reinitializeForm = this.reinitializeForm(this);
     }
 
     reinitializeForm() {
+        console.log("enter");   
         console.log(this.state.errorMessage);
         this.setState({
             errorMessage: "",
@@ -56,7 +57,6 @@ class ApptForm extends Component {
     }
 
     createUser(event) {
-        this.reinitializeForm();
         fetch('https://homage-covid.herokuapp.com/createBooking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -71,8 +71,7 @@ class ApptForm extends Component {
           .then(response => {
             console.log(response);
             if(response.status === "success") {
-                this.state.isDisabled = true;
-                console.log(this.state.isDisabled);
+                this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is booked successfully"});
             } else {
                 this.setState({errorMessage: "Failed to book appointment - " + response.reason});
@@ -99,11 +98,10 @@ class ApptForm extends Component {
           .then(response => {
             console.log(response);
             if(response.status === "success") {
-                this.state.isDisabled = true;
-                console.log(this.state.isDisabled);
+                this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is updated successfully"});
             } else {
-                this.setState({errorMessage: "Failed to updated appointment - " + response.reason});
+                this.setState({errorMessage: "Failed to update appointment - " + response.reason});
             }
           })
           .catch(err => {
@@ -126,8 +124,7 @@ class ApptForm extends Component {
           .then(response => {
             console.log(response);
             if(response.status === "success") {
-                this.state.isDisabled = true;
-                console.log(this.state.isDisabled);
+                this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is deleted successfully"});
             } else {
                 this.setState({errorMessage: "Failed to delete appointment - " + response.reason});
@@ -202,7 +199,7 @@ class ApptForm extends Component {
 
                 <Form.Group className="col-md-4 wrapper" as={Col} controlId="formCentre">
                     <Form.Label className="label"><b>Centre</b></Form.Label>
-                    <select value={this.state.selectedCentre}
+                    <select className="select-margin" value={this.state.selectedCentre}
                         onChange={e =>
                             this.setState({
                               selectedCentre: e.target.value,
@@ -225,7 +222,7 @@ class ApptForm extends Component {
     
                 <Form.Group className="col-md-4 wrapper" as={Col} controlId="formTimeslot">
                     <Form.Label className="label"><b>Timeslot</b></Form.Label>
-                    <select value={this.state.selectedSlot}
+                    <select className="select-margin" value={this.state.selectedSlot}
                         onChange= {e =>
                         this.setState({
                           selectedSlot: e.target.value,
@@ -239,17 +236,17 @@ class ApptForm extends Component {
                 <Form.Group className="wrapper">
                     <Button className="button-padding" variant="secondary" onClick={this.back}>Back</Button>
                     {this.state.data.bookingDetails === undefined && 
-                    <Button className="btn btn-primary button-padding" type="submit" onClick={this.createUser} disable={this.state.isDisabled}>Create</Button>}           
+                    <Button className="btn btn-primary button-padding" type="submit" onClick={this.createUser}>Create</Button>}           
                     {this.state.data.bookingDetails !== undefined && 
                     <Button className="btn btn-info button-padding" type="submit" onClick={this.updateUser}>Update</Button>}
                     {this.state.data.bookingDetails !== undefined && 
                     <Button className="btn btn-danger button-padding" type="submit" onClick={this.deleteUser}>Delete</Button>}
                 </Form.Group>
                     
-                <Alert variant='success' show={this.state.successMessage}>
+                <Alert variant='success' show={this.state.successMessage !== ""}>
                     {this.state.successMessage}
                 </Alert>
-                <Alert variant='danger' show={this.state.errorMessage}>
+                <Alert variant='danger' show={this.state.errorMessage !== ""}>
                     {this.state.errorMessage}
                 </Alert>
               </Form>
