@@ -22,17 +22,6 @@ class ApptForm extends Component {
         this.createUser = this.createUser.bind(this);
         this.updateUser = this.updateUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
-        this.reinitializeForm = this.reinitializeForm(this);
-    }
-
-    reinitializeForm() {
-        console.log("enter");   
-        console.log(this.state.errorMessage);
-        this.setState({
-            errorMessage: "",
-            successMessage: ""
-        })
-        console.log(this.state.errorMessage);
     }
 
     back  = (e) => {
@@ -74,6 +63,7 @@ class ApptForm extends Component {
                 this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is booked successfully"});
             } else {
+                this.setState ({successMessage:""});
                 this.setState({errorMessage: "Failed to book appointment - " + response.reason});
             }
           })
@@ -101,6 +91,7 @@ class ApptForm extends Component {
                 this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is updated successfully"});
             } else {
+              this.setState ({successMessage:""});
                 this.setState({errorMessage: "Failed to update appointment - " + response.reason});
             }
           })
@@ -127,6 +118,7 @@ class ApptForm extends Component {
                 this.setState ({errorMessage:""});
                 this.setState({successMessage: "Your appointment is deleted successfully"});
             } else {
+                this.setState ({successMessage:""});
                 this.setState({errorMessage: "Failed to delete appointment - " + response.reason});
             }
           })
