@@ -44,3 +44,11 @@
 .wrapper fieldset {
   margin: 20px 0;
 }
+
+.button-padding {
+  margin-right: 10px;
+}
+
+.select-margin {
+  margin-left: 5px;
+}
