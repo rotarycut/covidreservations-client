@@ -10,10 +10,10 @@ class ApptForm extends Component {
         super(props)
         this.state = {
             centres: [],
-            selectedCentre: "",
+            selectedCentre: this.props.inputValues.bookingDetails !== undefined ? this.props.inputValues.bookingDetails.nurseVaccinationCentreTimeslot.nurseVacCtrTimeSlotPK.vaccinationCentre.name : "",
             timeslots: [],
-            selectedSlot: "",
-            date: new Date(),
+            selectedSlot: this.props.inputValues.bookingDetails !== undefined ? this.props.inputValues.bookingDetails.nurseVaccinationCentreTimeslot.nurseVacCtrTimeSlotPK.slot.timeslot : "",
+            date: this.props.inputValues.bookingDetails !== undefined ? moment(new Date(this.props.inputValues.bookingDetails.vac_date)).valueOf() : new Date(),
             data: this.props.inputValues,
             errorMessage: "",
             successMessage:"",
@@ -23,7 +23,16 @@ class ApptForm extends Component {
         this.createUser = this.createUser.bind(this);
         this.updateUser = this.updateUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
-      }
+    }
+
+    reinitializeForm() {
+        console.log(this.state.errorMessage);
+        this.setState({
+            errorMessage: "",
+            successMessage: ""
+        })
+        console.log(this.state.errorMessage);
+    }
 
     back  = (e) => {
         e.preventDefault();
@@ -40,38 +49,14 @@ class ApptForm extends Component {
 
     getNameValue() {
         if(this.state.data.bookingDetails === undefined){
-           // return this.props.inputValues.username;
            return this.state.data.newUser;
-        }else{
+        } else{
             return this.state.data.bookingDetails.person.name;
         }
     }
 
-    getVacCtrValue() {
-        if(this.state.data.bookingDetails === undefined){
-            return this.state.selectedCentre;
-        }else{
-            return this.state.data.bookingDetails.nurseVaccinationCentreTimeslot.nurseVacCtrTimeSlotPK.vaccinationCentre.name;
-        }
-    }
-
-    getVacDateValue() {
-        if(this.state.data.bookingDetails === undefined){
-            return this.state.date;
-        }else{
-            return moment(new Date(this.state.data.bookingDetails.vac_date)).valueOf();        
-        }
-    }
-
-    getSlotValue(){
-        if(this.state.data.bookingDetails === undefined){
-            return this.state.selectedSlot;
-        }else{
-            return this.state.data.bookingDetails.nurseVaccinationCentreTimeslot.nurseVacCtrTimeSlotPK.slot.timeslot;
-        }
-    }
-
     createUser(event) {
+        this.reinitializeForm();
         fetch('https://homage-covid.herokuapp.com/createBooking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -79,7 +64,6 @@ class ApptForm extends Component {
                 "vac_centre_name": this.state.selectedCentre,
                 "slot": this.state.selectedSlot,
                 "vac_date": moment(this.state.date).format('YYYYMMDD'),
-                //"personName": this.props.inputValues.username
                 "personName": this.props.inputValues.newUser
             })
           })
@@ -110,15 +94,20 @@ class ApptForm extends Component {
                 "vac_date": moment(this.state.date).format('YYYYMMDD'),
                 "personName": this.props.inputValues.newUser
             })
-          }).then(function(response) {
-            console.log(response)
-            if(response.status === '200') {
-                console.log("success!");
+          })
+          .then(response => response.json())
+          .then(response => {
+            console.log(response);
+            if(response.status === "success") {
+                this.state.isDisabled = true;
+                console.log(this.state.isDisabled);
+                this.setState({successMessage: "Your appointment is updated successfully"});
             } else {
-                alert("Creating user failed");
+                this.setState({errorMessage: "Failed to updated appointment - " + response.reason});
             }
-          }).catch(error => {
-            console.log(error);
+          })
+          .catch(err => {
+            this.setState({errorMessage: "Something went wrong. Please contact IT support."});
           });
           event.preventDefault();
     }
@@ -133,15 +122,19 @@ class ApptForm extends Component {
                 "vac_date": moment(this.state.date).format('YYYYMMDD'),
                 "personName": this.props.inputValues.newUser
             })
-          }).then(function(response) {
-            console.log(response)
-            if(response.status === '200') {
-                console.log("success!");
+          }) .then(response => response.json())
+          .then(response => {
+            console.log(response);
+            if(response.status === "success") {
+                this.state.isDisabled = true;
+                console.log(this.state.isDisabled);
+                this.setState({successMessage: "Your appointment is deleted successfully"});
             } else {
-                alert("Creating user failed");
+                this.setState({errorMessage: "Failed to delete appointment - " + response.reason});
             }
-          }).catch(error => {
-            console.log(error);
+          })
+          .catch(err => {
+            this.setState({errorMessage: "Something went wrong. Please contact IT support."});
           });
           event.preventDefault();
     }
@@ -209,8 +202,7 @@ class ApptForm extends Component {
 
                 <Form.Group className="col-md-4 wrapper" as={Col} controlId="formCentre">
                     <Form.Label className="label"><b>Centre</b></Form.Label>
-                    {/* <select value={this.state.selectedCentre} */}
-                    <select value={this.getVacCtrValue()}
+                    <select value={this.state.selectedCentre}
                         onChange={e =>
                             this.setState({
                               selectedCentre: e.target.value,
@@ -224,7 +216,7 @@ class ApptForm extends Component {
                     <Form.Label className="label"><b>Appointment Date</b></Form.Label>
                     <DatePicker
                         onChange={ this.handleDateChange }
-                        selected={this.getVacDateValue()}
+                        selected={this.state.date}
                         name="date"
                         dateFormat="MM/dd/yyyy"
                         minDate={moment().toDate()}
@@ -233,8 +225,7 @@ class ApptForm extends Component {
     
                 <Form.Group className="col-md-4 wrapper" as={Col} controlId="formTimeslot">
                     <Form.Label className="label"><b>Timeslot</b></Form.Label>
-                    {/* <select value={this.state.selectedSlot} */}
-                    <select value={this.getSlotValue()}
+                    <select value={this.state.selectedSlot}
                         onChange= {e =>
                         this.setState({
                           selectedSlot: e.target.value,
@@ -242,19 +233,17 @@ class ApptForm extends Component {
                         })}>
                         {this.state.timeslots.map((timeslot) => <option key={timeslot.key} value={timeslot.key}>{timeslot.display}</option>)}
                         </select>
-                        <div style={{color: "red",marginTop: "5px"}}>
-                            {this.state.validationError}
-                        </div>
+            
                 </Form.Group>
                 
                 <Form.Group className="wrapper">
-                    <Button variant="secondary" onClick={this.back}>Back</Button>
+                    <Button className="button-padding" variant="secondary" onClick={this.back}>Back</Button>
                     {this.state.data.bookingDetails === undefined && 
-                    <Button className="btn btn-primary" type="submit" onClick={this.createUser} disable={this.state.isDisabled}>Create</Button>}           
+                    <Button className="btn btn-primary button-padding" type="submit" onClick={this.createUser} disable={this.state.isDisabled}>Create</Button>}           
                     {this.state.data.bookingDetails !== undefined && 
-                    <Button className="btn btn-info" type="submit" onClick={this.updateUser}>Update</Button>}
+                    <Button className="btn btn-info button-padding" type="submit" onClick={this.updateUser}>Update</Button>}
                     {this.state.data.bookingDetails !== undefined && 
-                    <Button className="btn btn-danger" type="submit" onClick={this.deleteUser}>Delete</Button>}
+                    <Button className="btn btn-danger button-padding" type="submit" onClick={this.deleteUser}>Delete</Button>}
                 </Form.Group>
                     
                 <Alert variant='success' show={this.state.successMessage}>
