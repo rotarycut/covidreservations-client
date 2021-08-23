@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Form, Button, Col, Container} from 'react-bootstrap';
+import { Form, Button, Col, Container } from 'react-bootstrap';
 
 class UserDetails extends Component {
+
     constructor(props) {
         super(props);
 
