@@ -35,11 +35,11 @@ class MainForm extends Component {
   }
 
   setNewUser = (newUser) => {
-      this.setState({newUser: newUser})
+    this.setState({newUser: newUser})
   }
 
   render() {
-    const { step, username, centre, timeslot, bookingDetails, newUser} = this.state;
+    const { step, username, centre, timeslot, bookingDetails, newUser } = this.state;
     const inputValues = { username, centre, timeslot, bookingDetails, newUser };
     
     switch(step) {
